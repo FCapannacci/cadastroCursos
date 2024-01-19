@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource test {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+//Tabela professor
+model Professor {
+  id        Int         @id @default(autoincrement())
+  nome      String
+  usuario   String      @unique
+  cursos    Curso[]
+  Aprovacao Aprovacao[]
+}
+
+//Tabela aluno
+model Aluno {
+  alunoIdExclusivo                Int          @id @default(autoincrement())
+  nome              String
+  usuario           String       @unique
+  aprovado          Boolean
+  cursos            Curso[]      @relation("CursoAluno")
+  aulasVisualizadas AcessoAula[]
+  aprovacoes        Aprovacao[]
+}
+
+//Tabela Curso
+model Curso {
+  id          Int         @id @default(autoincrement())
+  nome        String
+  descricao   String
+  banner      String
+  professor   Professor   @relation(fields: [professorId], references: [id])
+  professorId Int
+  alunos      Aluno[]     @relation("CursoAluno")
+  aulas       Aula[]
+  aprovacoes  Aprovacao[]
+}
+
+//Tabela Aula
+model Aula {
+  id         Int          @id @default(autoincrement())
+  texto      String?
+  arquivo    String?
+  link       String?
+  curso      Curso        @relation(fields: [cursoId], references: [id])
+  cursoId    Int
+  AcessoAula AcessoAula[]
+}
+
+//Tabela Acesso a aula
+model AcessoAula {
+  id          Int     @id @default(autoincrement())
+  visualizado Boolean
+  aluno       Aluno   @relation(fields: [alunoId], references: [alunoIdExclusivo])
+  alunoId     Int
+  aula        Aula    @relation(fields: [aulaId], references: [id])
+  aulaId      Int
+
+  @@unique([alunoId, aulaId])
+}
+
+//Tabela aprovação
+model Aprovacao {
+  id          Int       @id @default(autoincrement())
+  aprovado    Boolean
+  professor   Professor @relation(fields: [professorId], references: [id])
+  professorId Int
+  aluno       Aluno     @relation(fields: [alunoId], references: [alunoIdExclusivo])
+  alunoId     Int
+  curso       Curso     @relation(fields: [cursoId], references: [id])
+  cursoId     Int
+
+  @@unique([professorId, alunoId, cursoId])
+}
