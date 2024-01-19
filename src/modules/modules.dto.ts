@@ -26,13 +26,17 @@ export type UsuarioDTO = {
   };
   
   export type AulaDTO = {
-    cursoId: number; // Adicionando o cursoId na aula
+    cursoId: number; 
     texto?: string;
-    arquivo?: {
-      nome: string;
-      tipo: 'pdf' | 'xlsx' | 'docx' | 'pptx';
-    };
+    arquivo?: string;
     link?: string;
+  };
+
+  export type AlunoAcessoDTO = {
+    alunoId: number;
+    nome: string;
+    email: string;
+    aulasVisualizadas: number;
   };
  
   export type AcessoAulaDTO = {

@@ -84,15 +84,20 @@ export class ModulesController {
     return { message: 'Acesso revogado com sucesso' };
   }
 
-  @Post(':courseId/aulas')
+  @Post('/aulas')
   async createAula(
-    @Param('courseId') courseId: number,
     @Body() aulaDTO: AulaDTO,
   ) {
-    // Valide ou faça outras verificações necessárias aqui
-    await this.modulesService.createAula(courseId, aulaDTO);
-
-    return { message: 'Aula criada com sucesso!' };
+    console.log('Received request with aulaDTO:', aulaDTO);
+  
+    try {
+      await this.modulesService.createAula(aulaDTO.cursoId, aulaDTO);
+  
+      return { message: 'Aula criada com sucesso!' };
+    } catch (error) {
+      console.error(error);
+      return { message: 'Erro ao criar aula.' };
+    }
   }
 }
 

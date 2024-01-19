@@ -225,6 +225,8 @@ export class ModulesService {
     }
 
     async createAula(cursoId: number, aulaDTO: AulaDTO): Promise<void> {
+        console.log('Creating aula for cursoId:', cursoId);
+        console.log('Received aulaDTO:', aulaDTO);
         // Certifique-se de validar ou realizar outras verificações necessárias
       
         // Verificar se o curso associado à aula existe
@@ -238,19 +240,15 @@ export class ModulesService {
       
         // Criar a aula associada ao curso
         await this.prisma.aula.create({
-            data: {
-              texto: aulaDTO.texto,
-              arquivo: { // Assumindo que o campo arquivo aceita um objeto contendo nome e tipo
-                create: {
-                  nome: aulaDTO.arquivo?.nome,
-                  tipo: aulaDTO.arquivo?.tipo,
-                },
-              },
-              link: aulaDTO.link,
-              curso: {
-                connect: { id: Number(cursoId) },
+          data: {
+            texto: aulaDTO.texto,
+            arquivo: aulaDTO.arquivo, // assumindo que o campo arquivo aceita uma string
+            link: aulaDTO.link,
+            curso: {
+              connect: { id: Number(cursoId) },
             },
           },
         });
     }
+    
 }
