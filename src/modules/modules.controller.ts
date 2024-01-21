@@ -126,9 +126,7 @@ export class ModulesController {
             throw error;
         }
     }
-
-
-    
+       
     @Get(':cursoId/alunos/:alunoId/curso')
     async getCursoPorAluno(
         @Param('cursoId') cursoId: number,
