@@ -1,6 +1,6 @@
-import { Body, Controller, Post, ConflictException, Get, Param, Put, Delete, Req, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Post, ConflictException, Get, Param, Put, Delete, Req, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { ModulesService } from './modules.service';
-import { ProfessorDTO, AlunoDTO, CursoDTO, AulaDTO } from './modules.dto';
+import { ProfessorDTO, AlunoDTO, CursoDTO, AulaDTO, AprovacaoDTO, AlunoComAcessoDTO } from './modules.dto';
 
 @Controller('modules')
 export class ModulesController {
@@ -65,14 +65,14 @@ export class ModulesController {
   }
 
   @Post(':professorId/cursos/:cursoId/grant-access')
- async grantAccessToCourse(
-  @Param('professorId') professorId: number,
-  @Param('cursoId') cursoId: number,
-  @Body() studentIds: number[],  // Certifique-se de que o corpo seja um array
-) {
-  await this.modulesService.grantAccessToCourse(cursoId, studentIds);
-  return { message: 'Acesso concedido com sucesso' };
-}
+  async grantAccessToCourse(
+    @Param('professorId') professorId: number,
+    @Param('cursoId') cursoId: number,
+    @Body() studentIds: number[],  // Certifique-se de que o corpo seja um array
+  ) {
+    await this.modulesService.grantAccessToCourse(cursoId, studentIds);
+    return { message: 'Acesso concedido com sucesso' };
+  }
 
   @Post(':professorId/cursos/:cursoId/revoke-access')
   async revokeAccessToCourse(
@@ -89,16 +89,89 @@ export class ModulesController {
     @Body() aulaDTO: AulaDTO,
   ) {
     console.log('Received request with aulaDTO:', aulaDTO);
-  
+
     try {
       await this.modulesService.createAula(aulaDTO.cursoId, aulaDTO);
-  
+
       return { message: 'Aula criada com sucesso!' };
     } catch (error) {
       console.error(error);
       return { message: 'Erro ao criar aula.' };
     }
   }
+  @Get(':professorId/cursos/:cursoId/alunos-com-acesso')
+  async getAlunosComAcesso(
+    @Param('professorId') professorId: number,
+    @Param('cursoId') cursoId: number
+  ) {
+    const isProfessor = await this.modulesService.isUserProfessor(professorId);
+
+    if (!isProfessor) {
+      throw new UnauthorizedException('Apenas professores podem acessar esta informação.');
+    }
+
+    const alunosComAcesso = await this.modulesService.getAlunosComAcessoAoCurso(cursoId);
+    return { alunosComAcesso };
+  }
+
+  @Post(':professorId/cursos/:cursoId/aprovacoes')
+    async createAprovacao(@Body() aprovacaoDTO: AprovacaoDTO) {
+        try {
+            const result = await this.modulesService.createAprovacao(aprovacaoDTO);
+            return { success: result.success, data: result.data, message: result.message };
+        } catch (error) {
+            if (error instanceof UnauthorizedException) {
+                throw new UnauthorizedException(error.message);
+            }
+            throw error;
+        }
+    }
+
+
+    
+    @Get(':cursoId/alunos/:alunoId/curso')
+    async getCursoPorAluno(
+        @Param('cursoId') cursoId: number,
+        @Param('alunoId') alunoId: number,
+    ): Promise<CursoDTO> {
+        try {
+            const curso = await this.modulesService.getCursoPorAluno(alunoId, cursoId);
+            return curso;
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw new NotFoundException(error.message);
+            }
+            throw error;
+        }
+    }
+
+    @Post(':alunoId/aulas/:aulaId/visualizacao')
+    async registerAulaVisualization(
+        @Param('alunoId') alunoId: number,
+        @Param('aulaId') aulaId: number,
+    ) {
+        try {
+            await this.modulesService.registerAulaVisualization(alunoId, aulaId);
+            return { success: true, message: 'Visualização registrada com sucesso' };
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw new NotFoundException(error.message);
+            }
+            throw error;
+        }
+    }
+    @Get(':alunoId/cursos/:cursoId/status')
+    async getStatusDoAlunoNoCurso(
+        @Param('alunoId') alunoId: number,
+        @Param('cursoId') cursoId: number,
+    ): Promise<{ status: string }> {
+        try {
+            const status = await this.modulesService.getStatusDoAlunoNoCurso(alunoId, cursoId);
+            return { status };
+        } catch (error) {
+            // Tratar o erro conforme necessário, por exemplo, retornar uma resposta HTTP 404 se o curso não for encontrado
+            throw error;
+        }
+    }
+    
 }
-
-

@@ -13,7 +13,7 @@ export type UsuarioDTO = {
     nome: string;
     descricao: string;
     banner: string;
-    professorId: number;
+    professorId?: number;
     alunosParaConectarIds?: number[] | null;
     alunosParaDesconectarIds?: number[] | null;
   };
@@ -47,8 +47,24 @@ export type UsuarioDTO = {
   
   export type AprovacaoDTO = {
     aprovado: boolean;
-    professorId: number;
+    professor: number;
     alunoId: number;
-    cursoId: number;
-  };
-  
+    cursoId: number | null;
+    };
+
+  export type AlunoComAcessoDTO = {
+    alunoIdExclusivo: number;
+    nome: string;
+    usuario: string;
+    aprovado: boolean;
+    aulasVisualizadas: number;
+}; 
+
+export type aulasVisualizadasDTO = {
+  alunoIdExclusivo: number;
+  nome: string;
+  usuario: string;
+  aprovado: boolean;
+  aulasVisualizadas: number;
+  totalAulas: number;
+}
