@@ -1,3 +1,5 @@
+//modules.service de bkp pq esse funciona na minha maquina hehe
+
 import { Injectable, ConflictException, UnauthorizedException, NotFoundException, BadRequestException, Param, Req } from '@nestjs/common';
 import { PrismaService } from 'src/database/PrismaService';
 import { UsuarioDTO, ProfessorDTO, AlunoDTO, CursoDTO, AulaDTO, aulasVisualizadasDTO, AcessoAulaDTO, AprovacaoDTO, AlunoComAcessoDTO } from './modules.dto';
@@ -123,21 +125,24 @@ export class ModulesService {
     }
 
     async deleteCurso(professorId: number, cursoId: number) {
-        // Verifique se o professor existe e se está associado ao curso
-        const curso = await this.prisma.curso.findUnique({
-            where: { id: Number(cursoId), professorId: Number(professorId) },
+        return this.prisma.$transaction(async (prisma) => {
+            const curso = await prisma.curso.findUnique({
+                where: { id: Number(cursoId), professorId: Number(professorId) },
+            });
+    
+            if (!curso) {
+                throw new NotFoundException('Curso não encontrado');
+            }
+    
+            // Excluir registros relacionados (por exemplo, registros em tabelas associadas)
+    
+            // Restante da lógica para exclusão do curso
+            const result = await prisma.curso.delete({
+                where: { id: Number(cursoId) },
+            });
+    
+            return result;
         });
-
-        if (!curso) {
-            throw new NotFoundException('Curso não encontrado');
-        }
-
-        // Restante da lógica para exclusão do curso
-        const result = await this.prisma.curso.delete({
-            where: { id: Number(cursoId) },
-        });
-
-        return result;
     }
 
     async isUserProfessor(userId: number): Promise<boolean> {
@@ -160,7 +165,7 @@ export class ModulesService {
         // Verificar se todos os alunos existem antes de conceder acesso
         const existingStudents = await this.prisma.aluno.findMany({
             where: {
-                alunoIdExclusivo: {
+                id: {
                     in: studentIds,
                 },
             },
@@ -175,7 +180,7 @@ export class ModulesService {
             where: { id: Number(courseId) },
             data: {
                 alunos: {
-                    connect: existingStudents.map((student) => ({ alunoIdExclusivo: student.alunoIdExclusivo })),
+                    connect: existingStudents.map((student) => ({ id: student.id })),
                 },
             },
         });
@@ -191,7 +196,7 @@ export class ModulesService {
         // Verificar se todos os alunos existem antes de revogar acesso
         const existingStudents = await this.prisma.aluno.findMany({
             where: {
-                alunoIdExclusivo: {
+                id: {
                     in: studentIds,
                 },
             },
@@ -206,7 +211,7 @@ export class ModulesService {
             where: { id: Number(courseId) },
             data: {
                 alunos: {
-                    disconnect: existingStudents.map((student) => ({ alunoIdExclusivo: student.alunoIdExclusivo })),
+                    disconnect: existingStudents.map((student) => ({ id: student.id })),
                 },
             },
         });
@@ -256,7 +261,7 @@ export class ModulesService {
             include: {
                 alunos: {
                     select: {
-                        alunoIdExclusivo: true,
+                        id: true,
                         nome: true,
                         usuario: true,
                         aprovado: true,
@@ -275,7 +280,7 @@ export class ModulesService {
         }
 
         return curso.alunos.map((aluno) => ({
-            alunoIdExclusivo: aluno.alunoIdExclusivo,
+            alunoIdExclusivo: aluno.id,
             nome: aluno.nome,
             usuario: aluno.usuario,
             aprovado: aluno.aprovado,
@@ -319,7 +324,7 @@ export class ModulesService {
             include: {
                 alunos: {
                     select: {
-                        alunoIdExclusivo: true,
+                        id: true,
                         nome: true,
                         usuario: true,
                         aprovado: true,
@@ -348,7 +353,7 @@ export class ModulesService {
             const aprovado = aulasVisualizadas === totalAulas;
 
             return {
-                alunoIdExclusivo: aluno.alunoIdExclusivo,
+                alunoIdExclusivo: aluno.id,
                 nome: aluno.nome,
                 usuario: aluno.usuario,
                 aprovado: aprovado,
@@ -365,9 +370,9 @@ export class ModulesService {
             include: {
                 aulas: true,
                 alunos: {
-                    where: { alunoIdExclusivo: alunoId },
+                    where: { id: alunoId },
                     select: {
-                        alunoIdExclusivo: true,
+                        id: true,
                     },
                 },
             },
@@ -413,7 +418,7 @@ export class ModulesService {
                         connect: { id: Number(professor) },
                     },
                     aluno: {
-                        connect: { alunoIdExclusivo: Number(alunoId) },
+                        connect: { id: Number(alunoId) },
                     },
                     curso: {
                         connect: { id: Number(cursoId) },
@@ -457,7 +462,7 @@ export class ModulesService {
                 id: Number(cursoId),
                 alunos: {
                     some: {
-                        alunoIdExclusivo: Number(alunoId),
+                        id: Number(alunoId),
                     },
                 },
             },
@@ -474,7 +479,7 @@ export class ModulesService {
 
     async registerAulaVisualization(alunoId: number, aulaId: number): Promise<void> {
         const aluno = await this.prisma.aluno.findUnique({
-            where: { alunoIdExclusivo: Number(alunoId) },
+            where: { id: Number(alunoId) },
         });
 
         const aula = await this.prisma.aula.findUnique({
@@ -498,7 +503,7 @@ export class ModulesService {
         await this.prisma.acessoAula.create({
             data: {
                 aluno: {
-                    connect: { alunoIdExclusivo: Number(alunoId) },
+                    connect: { id: Number(alunoId) },
                 },
                 aula: {
                     connect: { id: Number(aulaId) },
@@ -513,9 +518,9 @@ export class ModulesService {
             include: {
                 aulas: true,
                 alunos: {
-                    where: { alunoIdExclusivo: Number(alunoId) },
+                    where: { id: Number(alunoId) },
                     select: {
-                        alunoIdExclusivo: true,
+                        id: true,
                     },
                 },
             },
@@ -544,3 +549,5 @@ export class ModulesService {
     }
     
 }
+
+////////

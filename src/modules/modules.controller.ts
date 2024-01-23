@@ -1,5 +1,5 @@
 import { Body, Controller, Post, ConflictException, Get, Param, Put, Delete, Req, UnauthorizedException, NotFoundException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
-import { ModulesService } from './modules.service';
+import { ModulesService } from './modules.serviceBKP';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiBadRequestResponse, ApiNotFoundResponse } from '@nestjs/swagger';
 import { ProfessorDTO, AlunoDTO, CursoDTO, AulaDTO, AprovacaoDTO, AlunoComAcessoDTO } from './modules.dto';
 import { AlunoSwagger, AprovacaoSwagger, AulaSwagger, CursoSwagger, ProfessorSwagger } from 'src/swagger/swagger.dto';
