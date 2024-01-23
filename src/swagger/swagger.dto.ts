@@ -1,3 +1,4 @@
+
 import { ApiProperty } from "@nestjs/swagger";
 
 export class ProfessorSwagger {
@@ -89,3 +90,5 @@ export class CursoSwagger {
     cursoId?: number | null;
   }
   
+
+  ////////

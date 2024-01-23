@@ -69,3 +69,6 @@ export type aulasVisualizadasDTO = {
   aulasVisualizadas: number;
   totalAulas: number;
 }
+
+
+////////
