@@ -37,6 +37,7 @@ export type UsuarioDTO = {
     nome: string;
     email: string;
     aulasVisualizadas: number;
+    aprovado: boolean;
   };
  
   export type AcessoAulaDTO = {

@@ -123,21 +123,24 @@ export class ModulesService {
     }
 
     async deleteCurso(professorId: number, cursoId: number) {
-        // Verifique se o professor existe e se está associado ao curso
-        const curso = await this.prisma.curso.findUnique({
-            where: { id: Number(cursoId), professorId: Number(professorId) },
+        return this.prisma.$transaction(async (prisma) => {
+            const curso = await prisma.curso.findUnique({
+                where: { id: Number(cursoId), professorId: Number(professorId) },
+            });
+    
+            if (!curso) {
+                throw new NotFoundException('Curso não encontrado');
+            }
+    
+            // Excluir registros relacionados (por exemplo, registros em tabelas associadas)
+    
+            // Restante da lógica para exclusão do curso
+            const result = await prisma.curso.delete({
+                where: { id: Number(cursoId) },
+            });
+    
+            return result;
         });
-
-        if (!curso) {
-            throw new NotFoundException('Curso não encontrado');
-        }
-
-        // Restante da lógica para exclusão do curso
-        const result = await this.prisma.curso.delete({
-            where: { id: Number(cursoId) },
-        });
-
-        return result;
     }
 
     async isUserProfessor(userId: number): Promise<boolean> {
