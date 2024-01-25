@@ -21,7 +21,7 @@ export type CursoDTO = {
 export type AlunoDTO = {
   nome: string;
   usuario: string;
-  alunoIdExclusivo: number;
+  id: number;
   matriculadoEmCursos?: CursoDTO[] | null;
 };
 
@@ -54,7 +54,7 @@ export type AprovacaoDTO = {
 };
 
 export type AlunoComAcessoDTO = {
-  alunoIdExclusivo: number;
+  id: number;
   nome: string;
   usuario: string;
   aprovado: boolean;
@@ -62,7 +62,7 @@ export type AlunoComAcessoDTO = {
 };
 
 export type aulasVisualizadasDTO = {
-  alunoIdExclusivo: number;
+  id: number;
   nome: string;
   usuario: string;
   aprovado: boolean;

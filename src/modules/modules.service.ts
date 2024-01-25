@@ -405,7 +405,7 @@ export class ModulesService {
       include: {
         aulas: true,
         alunos: {
-          where: { id: alunoId },
+          where: { id: Number(alunoId) },
           select: {
             id: true,
           },
