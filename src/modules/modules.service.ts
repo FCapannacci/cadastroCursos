@@ -43,8 +43,8 @@ export class ModulesService {
   }
 
   private generateFiveDigitId(): number {
-    const min = 10000; // Mínimo valor de 5 dígitos
-    const max = 99999; // Máximo valor de 5 dígitos
+    const min = 10000;
+    const max = 99999; 
     const randomId = Math.floor(Math.random() * (max - min + 1)) + min;
     return randomId;
   }
@@ -59,14 +59,11 @@ export class ModulesService {
       ...alunoDTO,
       aprovado: false,
     };
-
-    // Verifique se o nome de usuário é único antes de criar o aluno
     const usuarioExistente = await this.prisma.aluno.findUnique({
       where: { usuario: alunoData.usuario },
     });
 
     if (usuarioExistente) {
-      // Nome de usuário duplicado, você pode tratar isso como necessário
       throw new ConflictException('Nome de usuário já existente');
     }
 
@@ -77,15 +74,12 @@ export class ModulesService {
 
       return aluno;
     } catch (error) {
-      // Trate os erros, se necessário
       throw error;
     }
   }
 
-  // Adicione a lógica para gerar um ID exclusivo para o aluno
   async gerarAlunoId(): Promise<number> {
-    // Lógica para gerar um ID exclusivo
-    // Por exemplo, pode-se usar algum algoritmo de geração de ID único.
+    // Algoritmo de geração de ID único.
     return Math.floor(Math.random() * 1000000);
   }
 
@@ -99,7 +93,6 @@ export class ModulesService {
       throw new NotFoundException('Professor não encontrado');
     }
 
-    // Certifique-se de associar o curso ao professor
     const cursoData = {
       ...cursoDTO,
       professorId: Number(professorId),
@@ -112,12 +105,11 @@ export class ModulesService {
 
       return curso;
     } catch (error) {
-      // Trate os erros, se necessário
       throw error;
     }
   }
   async updateCurso(professorId: number, cursoId: number, cursoDTO: CursoDTO) {
-    // Verifique se o professor existe e se está associado ao curso
+    // Aqui acontece a verficação se o professor existe e se está associado ao curso
     const curso = await this.prisma.curso.findUnique({
       where: { id: Number(cursoId), professorId: Number(professorId) },
     });
@@ -127,20 +119,18 @@ export class ModulesService {
     }
 
     try {
-      // Atualize os dados do curso, garantindo que o professorId não seja alterado
+      // Atualização dos dados do curso, garantindo que o professorId não seja alterado
       const updatedCurso = await this.prisma.curso.update({
         where: { id: Number(cursoId) },
         data: { ...cursoDTO, professorId: Number(professorId) },
       });
       return updatedCurso;
     } catch (error) {
-      // Trate os erros, se necessário
       throw error;
     }
   }
 
   async deleteCurso(professorId: number, cursoId: number) {
-    // Verifique se o professor existe e se está associado ao curso
     const curso = await this.prisma.curso.findUnique({
       where: { id: Number(cursoId), professorId: Number(professorId) },
     });
@@ -148,8 +138,6 @@ export class ModulesService {
     if (!curso) {
       throw new NotFoundException('Curso não encontrado');
     }
-
-    // Restante da lógica para exclusão do curso
     const result = await this.prisma.curso.delete({
       where: { id: Number(cursoId) },
     });
@@ -178,8 +166,6 @@ export class ModulesService {
         'Digite um ID válido no corpo da requisição.',
       );
     }
-
-    // Verificar se todos os alunos existem antes de conceder acesso
     const existingStudents = await this.prisma.aluno.findMany({
       where: {
         id: {
@@ -192,7 +178,7 @@ export class ModulesService {
       throw new NotFoundException('Um ou mais alunos não foram encontrados.');
     }
 
-    // Conceder acesso apenas aos alunos existentes
+    // libera acesso apenas aos alunos existentes
     await this.prisma.curso.update({
       where: { id: Number(courseId) },
       data: {
@@ -216,8 +202,6 @@ export class ModulesService {
         'Digite um ID válido no corpo da requisição.',
       );
     }
-
-    // Verificar se todos os alunos existem antes de revogar acesso
     const existingStudents = await this.prisma.aluno.findMany({
       where: {
         id: {
@@ -230,7 +214,6 @@ export class ModulesService {
       throw new NotFoundException('Um ou mais alunos não foram encontrados.');
     }
 
-    // Revogar acesso apenas aos alunos existentes
     await this.prisma.curso.update({
       where: { id: Number(courseId) },
       data: {
@@ -258,9 +241,6 @@ export class ModulesService {
   async createAula(cursoId: number, aulaDTO: AulaDTO): Promise<void> {
     console.log('Creating aula for cursoId:', cursoId);
     console.log('Received aulaDTO:', aulaDTO);
-    // Certifique-se de validar ou realizar outras verificações necessárias
-
-    // Verificar se o curso associado à aula existe
     const curso = await this.prisma.curso.findUnique({
       where: { id: Number(cursoId) },
     });
@@ -269,11 +249,10 @@ export class ModulesService {
       throw new NotFoundException('Curso não encontrado');
     }
 
-    // Criar a aula associada ao curso
     await this.prisma.aula.create({
       data: {
         texto: aulaDTO.texto,
-        arquivo: aulaDTO.arquivo, // assumindo que o campo arquivo aceita uma string
+        arquivo: aulaDTO.arquivo, 
         link: aulaDTO.link,
         curso: {
           connect: { id: Number(cursoId) },
@@ -469,7 +448,7 @@ export class ModulesService {
         },
       });
 
-      // Atualize o status "aprovado" na API "alunos-com-acesso"
+      // Atualiza o status "aprovado" na API "alunos-com-acesso"
       await this.atualizarStatusAprovadoNaAlunosComAcesso(
         professor,
         cursoId,
@@ -527,8 +506,6 @@ export class ModulesService {
         'Curso não encontrado ou aluno não cadastrado no curso.',
       );
     }
-
-    // Remover o campo professorId do objeto de resposta
     const { professorId, ...cursoWithoutProfessorId } = curso;
     return cursoWithoutProfessorId;
   }

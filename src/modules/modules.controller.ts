@@ -16,7 +16,6 @@ import {
 } from '@nestjs/common';
 import { ModulesService } from './modules.service';
 import {
-  ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBody,
@@ -30,7 +29,6 @@ import {
   CursoDTO,
   AulaDTO,
   AprovacaoDTO,
-  AlunoComAcessoDTO,
 } from './modules.dto';
 import {
   AlunoSwagger,
@@ -39,7 +37,6 @@ import {
   CursoSwagger,
   ProfessorSwagger,
 } from 'src/swagger/swagger.dto';
-import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
 @Controller('modules')
 export class ModulesController {
@@ -125,8 +122,6 @@ export class ModulesController {
         'Apenas professores podem editar cursos.',
       );
     }
-
-    // Restante da lógica para editar o curso
     const curso = await this.modulesService.updateCurso(
       professorId,
       cursoId,
@@ -152,7 +147,6 @@ export class ModulesController {
     @Param('professorId') professorId: number,
     @Param('cursoId') cursoId: number,
   ) {
-    // Substitua isso pela lógica real de verificação do professor
     const isProfessor = await this.modulesService.isUserProfessor(professorId);
 
     if (!isProfessor) {
@@ -190,7 +184,7 @@ export class ModulesController {
   async grantAccessToCourse(
     @Param('professorId') professorId: number,
     @Param('cursoId') cursoId: number,
-    @Body() studentIds: number[], // Certifique-se de que o corpo seja um array
+    @Body() studentIds: number[],
   ) {
     await this.modulesService.grantAccessToCourse(cursoId, studentIds);
     return { message: 'Acesso concedido com sucesso' };
@@ -348,11 +342,11 @@ export class ModulesController {
   @ApiResponse({
     status: 201,
     description: 'Visualização registrada com sucesso',
-    type: Object, // Altere para o tipo de resposta real, se necessário
+    type: Object, 
   })
   @ApiNotFoundResponse({
     description: 'Aula não encontrada',
-    type: Object, // Altere para o tipo de resposta real, se necessário
+    type: Object,
   })
   @ApiParam({ name: 'alunoId', description: 'ID do Aluno', type: Number })
   @ApiParam({ name: 'aulaId', description: 'ID da Aula', type: Number })
