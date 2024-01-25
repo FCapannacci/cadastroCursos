@@ -7,7 +7,6 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
   controllers: [],
   providers: [],
 })
-
 export class AppModule {
   static configure(consumer: any): void {
     const config = new DocumentBuilder()
